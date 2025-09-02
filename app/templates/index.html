@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<header role="banner">
+  <h1>NutriChef</h1>
+  <p class="tagline">Waste Less, Cook Smart, Eat Well</p>
+
+  <div class="hero-image-container" aria-label="Vibrant and appetizing food photo">
+    <img src="{{ url_for('static', filename='food.jpg') }}" alt="Colorful and delicious food spread" class="hero-image-small" />
+    <h2 class="hero-tagline">Transform Your Pantry Into Culinary Magic!</h2>
+  </div>
+</header>
+
+<main role="main">
+  <section class="intro" aria-label="Application Introduction">
+    <p>
+      Welcome to NutriChef! Our AI-powered recipe recommender helps you transform what’s in your pantry into delicious, healthy meals tailored to your diet and cuisine preferences. Save money, reduce food waste, and enjoy cooking like never before!
+    </p>
+  </section>
+
+  <section class="how-it-works" aria-labelledby="how-it-works-title">
+    <h2 id="how-it-works-title">How NutriChef Works</h2>
+    <ol>
+      <li>Enter your available ingredients.</li>
+      <li>Select your dietary preferences and cuisine type.</li>
+      <li>Get personalized recipe suggestions instantly.</li>
+      <li>Save your cooking history to revisit anytime.</li>
+    </ol>
+  </section>
+
+  <section class="recipe-input" aria-labelledby="get-recipes-title">
+    <h2 id="get-recipes-title">Get Recipe Suggestions</h2>
+
+    <label for="ingredientsInput">Ingredients (comma separated):</label><br />
+    <input type="text" id="ingredientsInput" placeholder="Enter ingredients, comma separated" size="50" aria-required="true" aria-describedby="ingredientsHelp" /><br />
+    <small id="ingredientsHelp">Please separate ingredients with commas. Letters only.</small>
+    <br /><br />
+
+    <label for="dietSelect">Dietary preference:</label>
+    <select id="dietSelect" aria-describedby="dietHelp">
+      <option value="">No diet preference</option>
+      <option value="vegetarian">Vegetarian</option>
+      <option value="vegan">Vegan</option>
+      <option value="gluten-free">Gluten-free</option>
+    </select>
+    <small id="dietHelp">Choose a dietary preference if any.</small>
+    <br /><br />
+
+    <label for="cuisineSelect">Cuisine preference:</label>
+    <select id="cuisineSelect" aria-describedby="cuisineHelp">
+      <option value="">No cuisine preference</option>
+      <option value="Italian">Italian</option>
+      <option value="Mexican">Mexican</option>
+      <option value="Indian">Indian</option>
+      <option value="Kenyan">Kenyan</option>
+    </select>
+    <small id="cuisineHelp">Choose a preferred cuisine type.</small>
+    <br /><br />
+
+    <button id="getRecipesBtn" type="button" aria-label="Get recipe suggestions">Get Recipes</button>
+  </section>
+
+  <section id="recipes" style="margin-top: 20px;" aria-live="polite" aria-atomic="true" aria-relevant="additions"></section>
+
+  <section aria-labelledby="search-history-title">
+    <h2 id="search-history-title">Search History</h2>
+    <div id="history" role="region" aria-live="polite" aria-atomic="false"></div>
+  </section>
+</main>
+
+<footer role="contentinfo">
+  <p>NutriChef &copy; 2025 | Developed with ❤️ by Joan for smarter cooking</p>
+</footer>
+{% endblock %}
