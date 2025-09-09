@@ -1,19 +1,19 @@
 import time
 import logging
-from openai import OpenAI
+from google import genai
 from .extensions import cache
 
-client = OpenAI()
+client = genai.Client()
 
 def call_openai_with_retry(messages, max_retries=3):
     for attempt in range(max_retries):
         try:
-            return client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=messages,
-                max_tokens=150,
-                temperature=0.7,
+
+            response = client.models.generate_content(
+                model="gemini-2.5-flash", contents=messages
             )
+
+            return response.text
         except Exception as e:
             logging.warning(f"OpenAI API error: {e}, attempt {attempt + 1} of {max_retries}")
             if attempt == max_retries - 1:
@@ -31,11 +31,5 @@ def build_prompt(ingredients, diet, cuisine):
 @cache.memoize(timeout=3600)  # Caches for 1 hour
 def get_openai_recipes(ingredients, diet, cuisine):
     prompt = build_prompt(ingredients, diet, cuisine)
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt},
-    ]
-    response = call_openai_with_retry(messages)
-    recipes_text = response.choices[0].message.content.strip()
-    recipes = [line.strip() for line in recipes_text.split('\n') if line.strip()]
-    return recipes
+    response = call_openai_with_retry(prompt)
+    return response

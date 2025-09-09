@@ -1,26 +1,35 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify
-from flask_login import login_required, current_user
+import time
+import logging
+from google import genai
+from .extensions import cache
 
-main_bp = Blueprint('main', __name__)
+# Initialize Gemini client
+client = genai.Client()
 
-@main_bp.route('/')
-def index():
-    if not current_user.is_authenticated:
-        return redirect(url_for('auth.login'))
-    return render_template('index.html')
+def call_gemini_with_retry(prompt, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            return response.text
+        except Exception as e:
+            logging.warning(f"Gemini API error: {e}, attempt {attempt + 1} of {max_retries}")
+            if attempt == max_retries - 1:
+                raise e
+            time.sleep(2 ** attempt)
 
-@main_bp.route('/recipes', methods=['GET', 'POST'])
-@login_required
-def recipes():
-    # Recipe logic here
-    return jsonify({"message": "Recipe endpoint"})
+def build_prompt(ingredients, diet, cuisine):
+    prompt = f"Suggest 3 simple recipes with these ingredients: {ingredients.strip().lower()}."
+    if diet:
+        prompt += f" The recipes should be {diet.strip().lower()}."
+    if cuisine:
+        prompt += f" The recipes should be from {cuisine.strip().lower()} cuisine."
+    return prompt
 
-@main_bp.route('/history', methods=['GET'])
-@login_required
-def get_history():
-    user_email = current_user.email
-    history_data = [
-        {"recipe": "Spaghetti Bolognese", "date": "2025-09-01"},
-        {"recipe": "Vegan Tacos", "date": "2025-08-30"},
-    ]
-    return jsonify({"user": user_email, "history": history_data})
+@cache.memoize(timeout=3600)  # Cache for 1 hour
+def get_gemini_recipes(ingredients, diet, cuisine):
+    prompt = build_prompt(ingredients, diet, cuisine)
+    response = call_gemini_with_retry(prompt)
+    return response

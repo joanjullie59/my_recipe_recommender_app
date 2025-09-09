@@ -1,4 +1,3 @@
-
 async function loadHistory() {
   const historyDiv = document.getElementById('searchHistory');
   if (!historyDiv) return;
@@ -6,7 +5,7 @@ async function loadHistory() {
   historyDiv.innerHTML = 'Loading search history...';
 
   try {
-    const response = await fetch('/search-history', { credentials: 'include' });
+    const response = await fetch('/history', { credentials: 'include' });
     if (!response.ok) {
       throw new Error(`Status ${response.status}`);
     }
@@ -61,7 +60,7 @@ function setupEventListeners() {
     }
 
     const recipesDiv = document.getElementById('recipes');
-    recipesDiv.innerHTML = `<div class="spinner" title="Loading..."></div><span> Generating recipes from OpenAI...</span>`;
+    recipesDiv.innerHTML = `<div class="spinner" title="Loading..."></div><span> Generating recipes from GeminiAI...</span>`;
 
     try {
       const response = await fetch('/recipes', {
@@ -85,21 +84,15 @@ function setupEventListeners() {
 
       const data = await response.json();
 
-      if (data.recipes && data.recipes.length > 0) {
-        // Display AI-generated recipes (expected from OpenAI backend)
-        recipesDiv.innerHTML = data.recipes.map(recipe =>
-          `<div class="recipe-card">
-             <h3>${recipe.name || 'Recipe'}</h3>
-             <p>${recipe.description || ''}</p>
-             <strong>Ingredients:</strong>
-             <ul>${(recipe.ingredients || []).map(i => `<li>${i}</li>`).join('')}</ul>
-             <strong>Instructions:</strong>
-             <ol>${(recipe.instructions || []).map(step => `<li>${step}</li>`).join('')}</ol>
-           </div>`
-        ).join('');
+      // Since Gemini returns a text string, display directly
+      if (data.recipes) {
+        recipesDiv.innerHTML = `<pre>${data.recipes}</pre>`;
       } else {
         recipesDiv.innerHTML = '<p>No recipes found from AI.</p>';
       }
+
+      // Reload search history after new recipe generated
+      loadHistory();
 
     } catch (error) {
       recipesDiv.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
@@ -118,4 +111,3 @@ if (document.readyState !== 'loading') {
     if (document.readyState === 'complete') setupEventListeners();
   });
 }
-
